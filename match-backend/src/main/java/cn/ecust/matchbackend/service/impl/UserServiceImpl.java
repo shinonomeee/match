@@ -7,6 +7,8 @@ import cn.ecust.matchbackend.exception.BusinessException;
 import cn.ecust.matchbackend.mapper.UserMapper;
 import cn.ecust.matchbackend.entity.User;
 import cn.ecust.matchbackend.service.UserService;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -139,6 +142,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         safetyUser.setGender(originUser.getGender());
         safetyUser.setPhone(originUser.getPhone());
         safetyUser.setEmail(originUser.getEmail());
+        safetyUser.setTags(originUser.getTags());
         safetyUser.setUserRole(originUser.getUserRole());
         safetyUser.setUserStatus(originUser.getUserStatus());
         safetyUser.setCreateTime(originUser.getCreateTime());
@@ -161,6 +165,22 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         if (CollectionUtils.isEmpty(tagNameList)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
+        Gson gson = new Gson();
+        List<User> allUsers = this.baseMapper.selectList(null);
+        return allUsers.stream().filter(user -> {
+            String JSONTags = user.getTags();
+            if (StringUtils.isBlank(JSONTags)) {
+                return false;
+            }
+            Set<String> tmp = gson.fromJson(JSONTags, new TypeToken<Set<String>>(){}.getType());
+            for (String tagName : tagNameList) {
+                if (!tmp.contains(tagName)) {
+                    return false;
+                }
+            }
+            return true;
+        }).map(this::getSafetyUser).collect(Collectors.toList());
+        /* 另一种查询方法，数据量大时会比较慢
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         // 拼接and查询
         for (String tagName : tagNameList) {
@@ -168,6 +188,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         }
         List<User> userList = userMapper.selectList(queryWrapper);
         return userList.stream().map(this::getSafetyUser).collect(Collectors.toList());
+         */
     }
 
 
