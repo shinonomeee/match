@@ -4,12 +4,10 @@ import cn.ecust.matchbackend.entity.User;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -27,7 +25,7 @@ public class UserServiceTest {
     @Test
     public void testSearchUserByTags() {
         List<String> tags = Arrays.asList("java", "python");
-        List<User>  userList = userService.searchUserByTags(tags);
+        List<User>  userList = userService.searchUsersByTags(tags);
         Assert.assertNotNull(userList);
     }
 }

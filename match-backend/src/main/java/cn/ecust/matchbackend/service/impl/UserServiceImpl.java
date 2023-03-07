@@ -17,7 +17,6 @@ import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -160,13 +159,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         return 1;
     }
 
+    /**
+     * 根据标签查询用户-内存
+     * @param tagNameList
+     * @return List<User>
+     * @Author chris
+     */
     @Override
-    public List<User> searchUserByTags(List<String> tagNameList) {
+    public List<User> searchUsersByTags(List<String> tagNameList) {
         if (CollectionUtils.isEmpty(tagNameList)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         Gson gson = new Gson();
         List<User> allUsers = this.baseMapper.selectList(null);
+        // 可以并发优化，使用parallelStream()默认使用Java内置forkJoinPool作为线程池
         return allUsers.stream().filter(user -> {
             String JSONTags = user.getTags();
             if (StringUtils.isBlank(JSONTags)) {
@@ -180,7 +186,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             }
             return true;
         }).map(this::getSafetyUser).collect(Collectors.toList());
-        /* 另一种查询方法，数据量大时会比较慢
+    }
+
+
+    /**
+     * 根据标签查询用户-SQL
+     * @param tagNameList
+     * @return List<User>
+     * @Author chris
+     */
+    @Override
+    public List<User> searchUsersByTagsUsingSQL(List<String> tagNameList) {
+        if (CollectionUtils.isEmpty(tagNameList)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         // 拼接and查询
         for (String tagName : tagNameList) {
@@ -188,10 +207,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         }
         List<User> userList = userMapper.selectList(queryWrapper);
         return userList.stream().map(this::getSafetyUser).collect(Collectors.toList());
-         */
     }
-
-
 }
 
 

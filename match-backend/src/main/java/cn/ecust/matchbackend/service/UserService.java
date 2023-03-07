@@ -49,5 +49,20 @@ public interface UserService extends IService<User> {
      */
     int userLogout(HttpServletRequest request);
 
-    List<User> searchUserByTags(List<String> tags);
+    /**
+     * 根据标签查询用户-内存
+     * @param tags
+     * @return
+     * @Author chris
+     */
+    List<User> searchUsersByTags(List<String> tags);
+
+    /**
+     * 根据标签查询用户-SQL
+     * @param tagNameList
+     * @return
+     * @Author chris
+     */
+
+    List<User> searchUsersByTagsUsingSQL(List<String> tagNameList);
 }
