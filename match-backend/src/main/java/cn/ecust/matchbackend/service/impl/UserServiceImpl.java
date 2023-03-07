@@ -179,6 +179,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
                 return false;
             }
             Set<String> tmp = gson.fromJson(JSONTags, new TypeToken<Set<String>>(){}.getType());
+            if (tmp == null) {
+                return true;
+            }
             for (String tagName : tagNameList) {
                 if (!tmp.contains(tagName)) {
                     return false;
